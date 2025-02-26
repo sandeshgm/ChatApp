@@ -7,13 +7,14 @@ const jwtToken = async (userId, res) => {
 
   const expiresAt = new Date();
   expiresAt.setDate(expiresAt.getDate() + 10);
-  res.cookie("jwt", token),
+  res.cookie("jwt", token,
     {
       httpOnly: true,
+      maxAge: 30 * 24 * 60 * 60 * 1000,
       expire: expiresAt,
       sameSite:"strict",
       secure:process.env.SECURE !== "development"
-    };
+    });
 };
 
 module.exports = jwtToken;
