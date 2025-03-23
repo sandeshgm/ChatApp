@@ -8,23 +8,30 @@ const userRegister = async (req, res) => {
       req.body;
 
     //Checking user already exists or not
-    const user = await User.findOne({ username, email, username });
+    const user = await User.findOne({ $or: [{ username }, { email }] });
     if (user) {
-      res.status(400).json({
+      return res.status(400).json({
         message: "User already exist",
       });
-      return;
     }
 
     //Hash password
     const salt = bcrypt.genSaltSync(10);
     const hashPassword = bcrypt.hashSync(password, salt);
-    const profileBoy =
+
+    //set default profile Pucture
+    const defaultProfilePic =
       profilePic ||
-      `https://www.flaticon.com/free-icon/user_219970?term=avatar&page=1&position=60&origin=tag&related_id=219970${username}`;
-    const profileGirl =
-      profilePic ||
-      `https://www.flaticon.com/free-icon/user_219970?term=avatar&page=1&position=60&origin=tag&related_id=219970${username}`;
+      (gender === "male"
+        ? "https://cdn-icons-png.flaticon.com/512/219/219970.png"
+        : "https://cdn-icons-png.flaticon.com/512/219/219969.png");
+
+    // const profileBoy =
+    //   profilePic ||
+    //   `https://www.flaticon.com/free-icon/user_219970?term=avatar&page=1&position=60&origin=tag&related_id=219970${username}`;
+    // const profileGirl =
+    //   profilePic ||
+    //   `https://www.flaticon.com/free-icon/user_219970?term=avatar&page=1&position=60&origin=tag&related_id=219970${username}`;
 
     const newUser = new User({
       fullname,
@@ -32,17 +39,22 @@ const userRegister = async (req, res) => {
       email,
       password: hashPassword,
       gender,
-      profilePic: gender === "male" ? profileBoy : profileGirl,
+      profilePic: defaultProfilePic,
     });
 
-    if (newUser) {
-      await newUser.save();
-      jwtToken(newUser._id, res);
-    } else {
-      res.status(400).json({
-        message: "invalid user data",
-      });
-    }
+    await newUser.save();
+
+    jwtToken(newUser._id, res);
+
+    // if (newUser) {
+    //   await newUser.save();
+    //   jwtToken(newUser._id, res);
+    // } else {
+    //   res.status(400).json({
+    //     message: "invalid user data",
+    //   });
+    // }
+
     res.status(201).json({
       _id: newUser._id,
       username: newUser.username,
@@ -52,11 +64,11 @@ const userRegister = async (req, res) => {
       message: "User register successfull!",
     });
   } catch (error) {
+    console.log("Registration error", error);
     res.status(500).json({
       success: false,
       message: "Filled all data field ",
     });
-    console.log(error);
   }
 };
 
@@ -72,6 +84,8 @@ const userLogin = async (req, res) => {
       return;
     }
 
+
+    //compare password
     const comparePassword = bcrypt.compareSync(password, user.password || "");
     if (!comparePassword) {
       return res.status(400).json({
@@ -79,6 +93,7 @@ const userLogin = async (req, res) => {
       });
     }
     jwtToken(user._id, res);
+
     return res.status(200).json({
       _id: user._id,
       username: user.username,
@@ -107,4 +122,38 @@ const userLogOut = async (req, res) => {
   }
 };
 
-module.exports = { userRegister, userLogin, userLogOut };
+const getUserDetails = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const user = await User.findById(userId).select("-password"); // Exclude password
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+
+
+const searchUsers = async (req, res) => {
+  try {
+    const { query } = req.params;
+
+    const users = await User.find({
+      $or: [
+        { fullname: { $regex: query, $options: "i" } }, // Case-insensitive match
+        { username: { $regex: query, $options: "i" } }
+      ]
+    }).select("fullname username profilePic");
+
+    res.status(200).json(users);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+
+
+module.exports = { userRegister, userLogin, userLogOut,getUserDetails, searchUsers };
