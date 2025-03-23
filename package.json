@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev":"nodemon backend/index.js"
+    "dev": "nodemon backend/index.js"
   },
   "repository": {
     "type": "git",
@@ -20,6 +20,7 @@
     "bcryptjs": "^3.0.2",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "express-validator": "^7.2.1",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.10.2",
     "nodemon": "^3.1.9",

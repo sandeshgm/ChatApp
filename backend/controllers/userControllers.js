@@ -73,6 +73,7 @@ const userRegister = async (req, res) => {
 };
 
 const userLogin = async (req, res) => {
+  console.log("data", req.body);
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
@@ -83,7 +84,6 @@ const userLogin = async (req, res) => {
       });
       return;
     }
-
 
     //compare password
     const comparePassword = bcrypt.compareSync(password, user.password || "");
@@ -137,7 +137,6 @@ const getUserDetails = async (req, res) => {
   }
 };
 
-
 const searchUsers = async (req, res) => {
   try {
     const { query } = req.params;
@@ -145,8 +144,8 @@ const searchUsers = async (req, res) => {
     const users = await User.find({
       $or: [
         { fullname: { $regex: query, $options: "i" } }, // Case-insensitive match
-        { username: { $regex: query, $options: "i" } }
-      ]
+        { username: { $regex: query, $options: "i" } },
+      ],
     }).select("fullname username profilePic");
 
     res.status(200).json(users);
@@ -155,5 +154,10 @@ const searchUsers = async (req, res) => {
   }
 };
 
-
-module.exports = { userRegister, userLogin, userLogOut,getUserDetails, searchUsers };
+module.exports = {
+  userRegister,
+  userLogin,
+  userLogOut,
+  getUserDetails,
+  searchUsers,
+};
