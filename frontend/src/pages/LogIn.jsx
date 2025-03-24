@@ -1,4 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import axios from "axios";
@@ -16,20 +17,31 @@ const schema = yup
 export default function LogIn() {
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (user) {
+      navigate("/chat-page"); // Redirect to chat if already logged in
+    }
+  }, [navigate]);
+
   const mutation = useMutation({
     mutationFn: async (data) => {
       const res = await axios.post("/api/auth/login", data);
+      console.log(res.data);
       return res.data;
     },
     onSuccess: (data) => {
+      console.log("Login USer details:", data.user);
       toast.success(data.message);
 
-      // Store authentication token (if provided)
-      // if (data.token) {
-      //   localStorage.setItem("authToken", data.token);
-      // }
+      if (data.token) {
+        console.log(data.token);
+        localStorage.setItem("authToken", data.token);
+      }
 
-      navigate("/");
+      localStorage.setItem("authUser", JSON.stringify(data.user));
+
+      navigate("/chat-page");
     },
     onError: (error) => {
       toast.error(

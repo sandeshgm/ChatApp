@@ -95,11 +95,7 @@ const userLogin = async (req, res) => {
     jwtToken(user._id, res);
 
     return res.status(200).json({
-      _id: user._id,
-      username: user.username,
-      fullname: user.fullname,
-      profilePic: user.profilePic,
-      email: user.email,
+      user,
       message: "User login successfull!",
     });
   } catch (error) {
