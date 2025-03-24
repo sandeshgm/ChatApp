@@ -1,21 +1,24 @@
 import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import LogIn from "./pages/LogIn";
+import Register from "./pages/Register";
 
-import SignUp from "./pages/SignUp";
-import SignIn from "./pages/SignIn";
+const queryClient = new QueryClient();
 
 function App() {
   return (
     <>
       <ToastContainer />
-
-      <BrowserRouter>
-        <Routes>
-          <Route path="/sign-up" element={<SignUp />} />
-          <Route path="/sign-in" element={<SignIn />} />
-        </Routes>
-      </BrowserRouter>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/register" element={<Register />} />
+            <Route path="/login" element={<LogIn />} />
+          </Routes>
+        </BrowserRouter>
+      </QueryClientProvider>
     </>
   );
 }
